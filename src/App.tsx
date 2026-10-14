@@ -43,17 +43,12 @@ export default function App() {
   return (
     <div className="page">
       <header className="header">
-        <span className="header__logo" aria-hidden="true">
-          T&amp;T
-        </span>
-        <h1 className="header__name">Transcreve &amp; Traduz</h1>
+        <h1 className="header__name">Transcritor</h1>
       </header>
 
       <main>
         <section className="step">
-          <h2 className="step__title">
-            <span className="step__num">1</span> Envie seu arquivo
-          </h2>
+          <h2 className="step__title">Envie seu arquivo</h2>
           <UploadZone
             file={file}
             disabled={loading}
@@ -69,9 +64,7 @@ export default function App() {
         </section>
 
         <section className="step">
-          <h2 className="step__title">
-            <span className="step__num">2</span> Idiomas e processamento
-          </h2>
+          <h2 className="step__title">Idiomas e processamento</h2>
 
           <div className="lang-row">
             <div className="field">
@@ -129,19 +122,12 @@ export default function App() {
           )}
         </section>
 
-        <section className="step">
-          <h2 className="step__title">
-            <span className="step__num">3</span> Resultado
-          </h2>
-          {result && file ? (
+        {result && file && (
+          <section className="step">
+            <h2 className="step__title">Resultado</h2>
             <ResultPanel result={result} targetLang={target} fileName={file.name} />
-          ) : (
-            <p className="empty">
-              O texto original e a tradução aparecem aqui, lado a lado, depois do
-              processamento.
-            </p>
-          )}
-        </section>
+          </section>
+        )}
       </main>
     </div>
   );

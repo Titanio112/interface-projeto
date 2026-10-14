@@ -53,7 +53,8 @@ body {
 .file-chip__size { flex: none; color: var(--muted); font-size: 0.9rem; }
 
 /* Idiomas */
-.lang-row { display: flex; flex-wrap: wrap; gap: 1rem 2rem; margin-bottom: 1rem; }
+.lang-row { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 1rem 2rem; margin-bottom: 1.5rem; }
+.lang-row .field:last-child { align-items: flex-end; }
 .field { display: flex; flex-direction: column; gap: 0.25rem; min-width: 12rem; }
 .field__label { color: var(--muted); font-size: 0.9rem; }
 .field__static { padding: 0.55rem 0; font-weight: 500; }

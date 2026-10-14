@@ -4,7 +4,7 @@ Interface do MVP: envio de PDF/JPG/PNG, escolha do idioma de destino, resultado 
 
 ## Rodar
 
-```
+````
 npm install
 npm run dev
 ```
