@@ -3,23 +3,45 @@ import UploadZone from "./components/UploadZone";
 import ResultPanel from "./components/ResultPanel";
 import { LANGUAGES, languageName } from "./languages";
 import { processDocument } from "./api";
+import { detectLanguage } from "./detectLanguage";
 import type { ProcessResult } from "./types";
 
 type Status = "idle" | "loading" | "done" | "error";
+type Detection = "none" | "detecting" | "done";
 
 export default function App() {
   const [file, setFile] = useState<File | null>(null);
   const [target, setTarget] = useState("en");
+  const [detected, setDetected] = useState("");
+  const [detection, setDetection] = useState<Detection>("none");
   const [status, setStatus] = useState<Status>("idle");
   const [result, setResult] = useState<ProcessResult | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const loading = status === "loading";
+  const originalLang = detected || result?.detected_language || "";
 
   function reset() {
     setResult(null);
     setError(null);
     setStatus("idle");
+  }
+
+  async function handleFile(f: File) {
+    setFile(f);
+    setDetected("");
+    setDetection("detecting");
+    reset();
+    const code = await detectLanguage(f);
+    setDetected(code);
+    setDetection("done");
+  }
+
+  function handleRemove() {
+    setFile(null);
+    setDetected("");
+    setDetection("none");
+    reset();
   }
 
   async function handleProcess() {
@@ -40,6 +62,11 @@ export default function App() {
     }
   }
 
+  let sourceText = "Envie um arquivo para detectar";
+  if (detection === "detecting") sourceText = "Detectando idioma...";
+  else if (originalLang) sourceText = `Detectado: ${languageName(originalLang)}`;
+  else if (detection === "done") sourceText = "Não foi possível detectar";
+
   return (
     <div className="page">
       <header className="header">
@@ -52,14 +79,8 @@ export default function App() {
           <UploadZone
             file={file}
             disabled={loading}
-            onFile={(f) => {
-              setFile(f);
-              reset();
-            }}
-            onRemove={() => {
-              setFile(null);
-              reset();
-            }}
+            onFile={handleFile}
+            onRemove={handleRemove}
           />
         </section>
 
@@ -69,10 +90,8 @@ export default function App() {
           <div className="lang-row">
             <div className="field">
               <span className="field__label">Idioma original</span>
-              <span className="field__static">
-                {result
-                  ? `Detectado: ${languageName(result.detected_language)}`
-                  : "Detectado automaticamente"}
+              <span className="field__static" role="status">
+                {sourceText}
               </span>
             </div>
             <label className="field">
@@ -125,7 +144,12 @@ export default function App() {
         {result && file && (
           <section className="step">
             <h2 className="step__title">Resultado</h2>
-            <ResultPanel result={result} targetLang={target} fileName={file.name} />
+            <ResultPanel
+              result={result}
+              originalLang={originalLang}
+              targetLang={target}
+              fileName={file.name}
+            />
           </section>
         )}
       </main>

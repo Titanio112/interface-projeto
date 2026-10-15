@@ -10,5 +10,5 @@ export async function processDocument(
   _targetLang: string
 ): Promise<ProcessResult> {
   // TODO: chamar o backend aqui.
-  return { original_text: "", translated_text: "", detected_language: "pt" };
+  return { original_text: "", translated_text: "", detected_language: "" };
 }

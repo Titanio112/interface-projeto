@@ -4,16 +4,26 @@ import { languageName } from "../languages";
 
 interface Props {
   result: ProcessResult;
+  originalLang: string;
   targetLang: string;
   fileName: string;
 }
 
-export default function ResultPanel({ result, targetLang, fileName }: Props) {
+export default function ResultPanel({
+  result,
+  originalLang,
+  targetLang,
+  fileName,
+}: Props) {
   const [tab, setTab] = useState<"original" | "translated">("original");
+
+  const originalLabel = originalLang
+    ? `Texto original (${languageName(originalLang)})`
+    : "Texto original";
 
   function download() {
     const content =
-      `Texto original (${languageName(result.detected_language)})\n` +
+      `${originalLabel}\n` +
       `${"-".repeat(40)}\n${result.original_text}\n\n` +
       `Texto traduzido (${languageName(targetLang)})\n` +
       `${"-".repeat(40)}\n${result.translated_text}\n`;
@@ -49,9 +59,7 @@ export default function ResultPanel({ result, targetLang, fileName }: Props) {
 
       <div className="result" data-tab={tab}>
         <section className="result__col result__col--original">
-          <h3 className="result__title">
-            Texto original ({languageName(result.detected_language)})
-          </h3>
+          <h3 className="result__title">{originalLabel}</h3>
           <pre className="result__text">{result.original_text}</pre>
         </section>
         <section className="result__col result__col--translated">
