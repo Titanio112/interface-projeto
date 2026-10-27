@@ -3,7 +3,7 @@ import UploadZone from "./components/UploadZone";
 import ResultPanel from "./components/ResultPanel";
 import ThemeToggle from "./components/ThemeToggle";
 import Credits from "./components/Credits";
-import { LANGUAGES, languageName } from "./languages";
+import { LANGUAGES, SOURCE_LANGUAGES, languageName } from "./languages";
 import { processDocument } from "./api";
 import { detectLanguage } from "./detectLanguage";
 import type { ProcessResult } from "./types";
@@ -14,6 +14,7 @@ type Detection = "none" | "detecting" | "done";
 export default function App() {
   const [file, setFile] = useState<File | null>(null);
   const [target, setTarget] = useState("en");
+  const [source, setSource] = useState("pt");
   const [detected, setDetected] = useState("");
   const [detection, setDetection] = useState<Detection>("none");
   const [status, setStatus] = useState<Status>("idle");
@@ -37,6 +38,8 @@ export default function App() {
     const code = await detectLanguage(f);
     setDetected(code);
     setDetection("done");
+    // PDF com texto: já escolhe o idioma detectado, se o OCR souber lê-lo.
+    if (SOURCE_LANGUAGES.some((l) => l.code === code)) setSource(code);
   }
 
   function handleRemove() {
@@ -51,7 +54,7 @@ export default function App() {
     setStatus("loading");
     setError(null);
     try {
-      const data = await processDocument(file, target);
+      const data = await processDocument(file, target, source);
       setResult(data);
       setStatus("done");
     } catch (e) {
@@ -66,8 +69,8 @@ export default function App() {
 
   let sourceText = "Envie um arquivo para detectar";
   if (detection === "detecting") sourceText = "Detectando idioma...";
-  else if (originalLang) sourceText = `Detectado: ${languageName(originalLang)}`;
-  else if (detection === "done") sourceText = "Não foi possível detectar";
+  else if (detected) sourceText = `Detectado: ${languageName(detected)}`;
+  else if (detection === "done") sourceText = "Escolha o idioma do texto";
 
   return (
     <div className="page">
@@ -91,12 +94,27 @@ export default function App() {
           <h2 className="step__title">Idiomas e processamento</h2>
 
           <div className="lang-row">
-            <div className="field">
+            <label className="field">
               <span className="field__label">Idioma original</span>
-              <span className="field__static" role="status">
+              <select
+                className="select"
+                value={source}
+                disabled={loading}
+                onChange={(e) => {
+                  setSource(e.target.value);
+                  reset();
+                }}
+              >
+                {SOURCE_LANGUAGES.map((l) => (
+                  <option key={l.code} value={l.code}>
+                    {l.name}
+                  </option>
+                ))}
+              </select>
+              <span className="field__hint" role="status">
                 {sourceText}
               </span>
-            </div>
+            </label>
             <label className="field">
               <span className="field__label">Traduzir para</span>
               <select

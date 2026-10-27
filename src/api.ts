@@ -10,10 +10,12 @@ const API_URL = import.meta.env.VITE_API_URL ?? "";
  */
 export async function processDocument(
   file: File,
-  targetLang: string
+  targetLang: string,
+  sourceLang: string
 ): Promise<ProcessResult> {
   const body = new FormData();
   body.append("file", file);
+  body.append("source_lang", sourceLang);
   body.append("target_lang", targetLang);
 
   let res: Response;
