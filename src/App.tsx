@@ -51,6 +51,8 @@ export default function App() {
 
   async function handleProcess() {
     if (!file) return;
+    // Limpa o resultado anterior: o painel remonta e não reaproveita texto velho (nem na exportação).
+    setResult(null);
     setStatus("loading");
     setError(null);
     try {
