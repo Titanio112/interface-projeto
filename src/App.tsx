@@ -1,6 +1,8 @@
 import { useState } from "react";
 import UploadZone from "./components/UploadZone";
 import ResultPanel from "./components/ResultPanel";
+import ThemeToggle from "./components/ThemeToggle";
+import Credits from "./components/Credits";
 import { LANGUAGES, languageName } from "./languages";
 import { processDocument } from "./api";
 import { detectLanguage } from "./detectLanguage";
@@ -71,6 +73,7 @@ export default function App() {
     <div className="page">
       <header className="header">
         <h1 className="header__name">Transcritor</h1>
+        <ThemeToggle />
       </header>
 
       <main>
@@ -142,7 +145,7 @@ export default function App() {
         </section>
 
         {result && file && (
-          <section className="step">
+          <section className="step step--result">
             <h2 className="step__title">Resultado</h2>
             <ResultPanel
               result={result}
@@ -153,6 +156,8 @@ export default function App() {
           </section>
         )}
       </main>
+
+      <Credits />
     </div>
   );
 }
