@@ -16,6 +16,7 @@ export default function ResultPanel({
   fileName,
 }: Props) {
   const [tab, setTab] = useState<"original" | "translated">("original");
+  const [text, setText] = useState(result.original_text);
 
   const originalLabel = originalLang
     ? `Texto original (${languageName(originalLang)})`
@@ -24,7 +25,7 @@ export default function ResultPanel({
   function download() {
     const content =
       `${originalLabel}\n` +
-      `${"-".repeat(40)}\n${result.original_text}\n\n` +
+      `${"-".repeat(40)}\n${text}\n\n` +
       `Texto traduzido (${languageName(targetLang)})\n` +
       `${"-".repeat(40)}\n${result.translated_text}\n`;
     const blob = new Blob([content], { type: "text/plain;charset=utf-8" });
@@ -60,11 +61,21 @@ export default function ResultPanel({
       <div className="result" data-tab={tab}>
         <section className="result__col result__col--original">
           <h3 className="result__title">{originalLabel}</h3>
-          <pre className="result__text">{result.original_text}</pre>
+          <textarea
+            className="result__text"
+            value={text}
+            onChange={(e) => setText(e.target.value)}
+            aria-label={originalLabel}
+            spellCheck={false}
+          />
         </section>
         <section className="result__col result__col--translated">
           <h3 className="result__title">Texto traduzido ({languageName(targetLang)})</h3>
-          <pre className="result__text">{result.translated_text}</pre>
+          {result.translated_text ? (
+            <pre className="result__text">{result.translated_text}</pre>
+          ) : (
+            <p className="message">Tradução ainda não habilitada.</p>
+          )}
         </section>
       </div>
 
