@@ -13,7 +13,7 @@ type Detection = "none" | "detecting" | "done";
 
 export default function App() {
   const [file, setFile] = useState<File | null>(null);
-  const [target, setTarget] = useState("en");
+  const [target, setTarget] = useState("pt");
   const [source, setSource] = useState("pt");
   const [detected, setDetected] = useState("");
   const [detection, setDetection] = useState<Detection>("none");
@@ -22,7 +22,12 @@ export default function App() {
   const [error, setError] = useState<string | null>(null);
 
   const loading = status === "loading";
-  const originalLang = detected || result?.detected_language || "";
+  // Sugestão da API, só para idiomas que o OCR sabe ler.
+  const suggested = SOURCE_LANGUAGES.some((l) => l.code === result?.suggested_language)
+    ? result!.suggested_language!
+    : "";
+  // Idioma que o OCR usou (devolvido pela API), não o que está selecionado agora.
+  const originalLang = result?.detected_language || "";
 
   function reset() {
     setResult(null);
@@ -49,12 +54,14 @@ export default function App() {
     reset();
   }
 
-  async function handleProcess() {
+  async function handleProcess(lang = source) {
     if (!file) return;
+    // Limpa o resultado anterior: o painel remonta e não reaproveita texto velho (nem na exportação).
+    setResult(null);
     setStatus("loading");
     setError(null);
     try {
-      const data = await processDocument(file, target, source);
+      const data = await processDocument(file, target, lang);
       setResult(data);
       setStatus("done");
     } catch (e) {
@@ -139,7 +146,7 @@ export default function App() {
             type="button"
             className="button"
             disabled={!file || loading}
-            onClick={handleProcess}
+            onClick={() => handleProcess()}
           >
             {loading ? (
               <>
@@ -165,6 +172,22 @@ export default function App() {
         {result && file && (
           <section className="step step--result">
             <h2 className="step__title">Resultado</h2>
+            {suggested && (
+              <p className="suggestion" role="status">
+                Parece ser {languageName(suggested).toLowerCase()} (
+                {Math.round((result.suggestion_confidence ?? 0) * 100)}%).
+                <button
+                  type="button"
+                  className="link-button"
+                  onClick={() => {
+                    setSource(suggested);
+                    handleProcess(suggested);
+                  }}
+                >
+                  Refazer o OCR em {languageName(suggested).toLowerCase()}?
+                </button>
+              </p>
+            )}
             <ResultPanel
               result={result}
               originalLang={originalLang}
