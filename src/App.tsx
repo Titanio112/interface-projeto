@@ -22,7 +22,8 @@ export default function App() {
   const [error, setError] = useState<string | null>(null);
 
   const loading = status === "loading";
-  const originalLang = detected || result?.detected_language || "";
+  // Idioma que o OCR usou (devolvido pela API), não o que está selecionado agora.
+  const originalLang = result?.detected_language || "";
 
   function reset() {
     setResult(null);
