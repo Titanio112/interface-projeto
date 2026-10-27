@@ -13,7 +13,7 @@ type Detection = "none" | "detecting" | "done";
 
 export default function App() {
   const [file, setFile] = useState<File | null>(null);
-  const [target, setTarget] = useState("en");
+  const [target, setTarget] = useState("pt");
   const [source, setSource] = useState("pt");
   const [detected, setDetected] = useState("");
   const [detection, setDetection] = useState<Detection>("none");
@@ -50,14 +50,14 @@ export default function App() {
     reset();
   }
 
-  async function handleProcess() {
+  async function handleProcess(lang = source) {
     if (!file) return;
     // Limpa o resultado anterior: o painel remonta e não reaproveita texto velho (nem na exportação).
     setResult(null);
     setStatus("loading");
     setError(null);
     try {
-      const data = await processDocument(file, target, source);
+      const data = await processDocument(file, target, lang);
       setResult(data);
       setStatus("done");
     } catch (e) {
@@ -142,7 +142,7 @@ export default function App() {
             type="button"
             className="button"
             disabled={!file || loading}
-            onClick={handleProcess}
+            onClick={() => handleProcess()}
           >
             {loading ? (
               <>

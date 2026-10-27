@@ -1,6 +1,7 @@
-import { useState } from "react";
-import type { ProcessResult } from "../types";
+import { useEffect, useState } from "react";
+import type { ProcessResult, TranslateResult } from "../types";
 import { languageName } from "../languages";
+import { translateText, TRANSLATION_UNAVAILABLE } from "../api";
 
 interface Props {
   result: ProcessResult;
@@ -17,22 +18,46 @@ export default function ResultPanel({
 }: Props) {
   const [tab, setTab] = useState<"original" | "translated">("original");
   const [text, setText] = useState(result.original_text);
+  const [translation, setTranslation] = useState<TranslateResult | null>(null);
+  const [translatedFrom, setTranslatedFrom] = useState(result.original_text);
+  const [translating, setTranslating] = useState(true);
 
   const originalLabel = originalLang
     ? `Texto original (${languageName(originalLang)})`
     : "Texto original";
+  const translatedLabel = `Texto traduzido (${languageName(targetLang)})`;
+  const translated = translation?.translated_text ?? "";
+
+  async function translate(source: string, signal?: AbortSignal) {
+    setTranslating(true);
+    setTranslatedFrom(source);
+    try {
+      setTranslation(await translateText(source, originalLang, targetLang, signal));
+    } catch (e) {
+      if (signal?.aborted) return;
+      const notice = e instanceof Error ? e.message : TRANSLATION_UNAVAILABLE;
+      setTranslation({ translated_text: "", translation_notice: notice });
+    }
+    setTranslating(false);
+  }
+
+  // O original já está na tela; a tradução chega depois.
+  useEffect(() => {
+    const ctrl = new AbortController();
+    translate(result.original_text, ctrl.signal);
+    return () => ctrl.abort();
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   function download() {
-    const content =
-      `${originalLabel}\n` +
-      `${"-".repeat(40)}\n${text}\n\n` +
-      `Texto traduzido (${languageName(targetLang)})\n` +
-      `${"-".repeat(40)}\n${result.translated_text}\n`;
+    let content = `${originalLabel}\n${"-".repeat(40)}\n${text}\n`;
+    if (translated) {
+      content += `\n${translatedLabel}\n${"-".repeat(40)}\n${translated}\n`;
+    }
     const blob = new Blob([content], { type: "text/plain;charset=utf-8" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    const suffix = result.translated_text ? "traduzido" : "transcricao";
+    const suffix = translated ? "traduzido" : "transcricao";
     a.download = `${fileName.replace(/\.[^.]+$/, "")}-${suffix}.txt`;
     a.click();
     URL.revokeObjectURL(url);
@@ -69,18 +94,40 @@ export default function ResultPanel({
             aria-label={originalLabel}
             spellCheck={false}
           />
+          {text !== translatedFrom && !translating && (
+            <button
+              type="button"
+              className="button button--secondary"
+              onClick={() => translate(text)}
+            >
+              Traduzir de novo
+            </button>
+          )}
         </section>
-        <section className="result__col result__col--translated">
-          <h3 className="result__title">Texto traduzido ({languageName(targetLang)})</h3>
-          {result.translated_text ? (
-            <pre className="result__text">{result.translated_text}</pre>
+        <section className="result__col result__col--translated" aria-busy={translating}>
+          <h3 className="result__title">{translatedLabel}</h3>
+          {translating ? (
+            <p className="message" role="status">
+              <span className="spinner spinner--inline" aria-hidden="true" /> Traduzindo...
+            </p>
           ) : (
-            <p className="message">Tradução ainda não habilitada.</p>
+            <>
+              {translated && <pre className="result__text">{translated}</pre>}
+              {translation?.translation_notice && (
+                <p className="message" role="status">
+                  {translation.translation_notice}
+                </p>
+              )}
+            </>
           )}
         </section>
       </div>
 
-      <button type="button" className="button button--secondary" onClick={download}>
+      <button
+        type="button"
+        className="button button--secondary"
+        onClick={download}
+      >
         Baixar em .txt
       </button>
     </div>
