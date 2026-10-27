@@ -22,6 +22,10 @@ export default function App() {
   const [error, setError] = useState<string | null>(null);
 
   const loading = status === "loading";
+  // Sugestão da API, só para idiomas que o OCR sabe ler.
+  const suggested = SOURCE_LANGUAGES.some((l) => l.code === result?.suggested_language)
+    ? result!.suggested_language!
+    : "";
   // Idioma que o OCR usou (devolvido pela API), não o que está selecionado agora.
   const originalLang = result?.detected_language || "";
 
@@ -168,6 +172,22 @@ export default function App() {
         {result && file && (
           <section className="step step--result">
             <h2 className="step__title">Resultado</h2>
+            {suggested && (
+              <p className="suggestion" role="status">
+                Parece ser {languageName(suggested).toLowerCase()} (
+                {Math.round((result.suggestion_confidence ?? 0) * 100)}%).
+                <button
+                  type="button"
+                  className="link-button"
+                  onClick={() => {
+                    setSource(suggested);
+                    handleProcess(suggested);
+                  }}
+                >
+                  Refazer o OCR em {languageName(suggested).toLowerCase()}?
+                </button>
+              </p>
+            )}
             <ResultPanel
               result={result}
               originalLang={originalLang}
