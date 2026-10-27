@@ -6,7 +6,8 @@ export interface Credit {
 }
 
 export const CREDITS: Credit[] = [
-  { name: "Antônio Prado Horta", github: "Titanio112", role: "Backend, OCR e infraestrutura" },
+  // O espaço no começo de role é proposital: faz parte do HTML combinado para o cartão.
+  { name: "Antônio Prado Horta", github: "Titanio112", role: " FullStack, OCR e Infraestrutura" },
   { name: "Carla Haber", github: "carlinhahaber-png", role: "Interface web (frontend)" },
 ];
 
