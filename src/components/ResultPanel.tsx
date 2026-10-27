@@ -32,7 +32,8 @@ export default function ResultPanel({
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `${fileName.replace(/\.[^.]+$/, "")}-traduzido.txt`;
+    const suffix = result.translated_text ? "traduzido" : "transcricao";
+    a.download = `${fileName.replace(/\.[^.]+$/, "")}-${suffix}.txt`;
     a.click();
     URL.revokeObjectURL(url);
   }
