@@ -84,6 +84,7 @@ body {
 .result__col + .result__col { border-left: 1px solid var(--line); }
 .result__title { margin: 0 0 0.75rem; padding-bottom: 0.5rem; border-bottom: 2px solid var(--ink); font-size: 1rem; }
 .result__text { margin: 0; max-height: 28rem; overflow: auto; font-family: var(--font-doc); font-size: 1.05rem; line-height: 1.65; white-space: pre-wrap; word-break: break-word; }
+textarea.result__text { display: block; width: 100%; min-height: 20rem; padding: 0; border: 0; background: none; color: inherit; resize: vertical; }
 
 @media (max-width: 640px) {
   .tabs { display: flex; }
